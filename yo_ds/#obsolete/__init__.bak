@@ -1,0 +1,174 @@
+from yo_extensions import *
+from yo_extensions.misc import *
+import keras
+import numpy as np
+from keras.utils import plot_model
+from typing import *
+
+
+class DataGenerator(keras.utils.Sequence):
+    'Generates data for Keras'
+    def __init__(
+            self,
+            sample_ids,
+            input_selector,
+            output_selector,
+            batch_size=64,
+            shuffle=True,
+            sample_weights_selector = None
+    ):
+        self.sample_ids = sample_ids
+        self.input_selector = input_selector
+        self.output_selector = output_selector
+        self.batch_size = batch_size
+        self.shuffle = shuffle
+        self.samples_weights_selector = sample_weights_selector
+        self.on_epoch_end()
+
+    def __len__(self):
+        'Denotes the number of batches per epoch'
+        return int(np.ceil(len(self.sample_ids) / self.batch_size))
+
+    def on_epoch_end(self):
+        'Updates indexes after each epoch'
+        self.indexes = np.arange(len(self.sample_ids))
+        if self.shuffle == True:
+            np.random.shuffle(self.indexes)
+
+    def __getitem__(self, index):
+        'Generate one batch of data'
+        indexes = self.indexes[index * self.batch_size:(index + 1) * self.batch_size]
+        samples = [self.sample_ids[k] for k in indexes]
+        result = self.get_samples(samples)
+        return result
+
+    def get_samples(self, ids):
+        Xs = self.input_selector(ids)
+        ys = self.output_selector(ids)
+        if self.samples_weights_selector is not None:
+            ws = np.array([self.samples_weights_selector(id) for id in ids])
+            return Xs, ys, ws
+        else:
+            return Xs, ys
+
+
+class Featurizer:
+    def __init__(self, *args: Callable, **kwargs: Callable):
+        if (len(args)>0 and len(kwargs)>0) or (len(args)==0 and len(kwargs)==0):
+            raise ValueError('Featurizer can accept exactly one of: args or kwargs')
+
+        self.args = args
+        self.kwargs = kwargs
+
+    def get_features(self, arg):
+        if len(self.args)==1:
+            return self.args[0](arg)
+        elif len(self.args)!=0:
+            return [f(arg) for f in self.args]
+        else:
+            return {key:f(arg) for key, f in self.kwargs.items()}
+
+    def get_feature_at_index(self, features, index):
+        if len(self.args)==1:
+            return features[index]
+        elif len(self.args)!=0:
+            return [f[index] for f in features]
+        else:
+            return {key: f[index] for key, f in features.items()}
+
+
+class ModelFactoryBase:
+    def create_model(self):
+        raise NotImplementedError()
+    def create_x_featurizer(self) -> Featurizer:
+        raise NotImplementedError()
+    def create_y_featurizer(self) -> Featurizer:
+        raise NotImplementedError()
+    def create_weight_selector(self) -> Optional[Callable[[Any],float]]:
+        return None
+    def get_settings(self):
+        return {}
+
+
+class EvaluationResult:
+    def __init__(self, id: Any, input: np.ndarray, output: np.ndarray, answer: np.ndarray):
+        self.id = id
+        self.input = input
+        self.output = output
+        self.answer = answer
+
+class KerasTrainTest:
+    def __init__(self, factory: ModelFactoryBase, path: str, reset: bool = False):
+        self.X_featurizer = factory.create_x_featurizer()
+        self.Y_featurizer = factory.create_y_featurizer()
+        self.path = path
+        self.model_file = os.path.join(self.path,'model')
+        self.history_file = os.path.join(self.path,'history')
+        self.settings_file = os.path.join(self.path,'settings.json')
+        self.weights_selector = factory.create_weight_selector()
+
+        if os.path.isfile(self.model_file) and not reset:
+            self.model = keras.models.load_model(self.model_file)
+            self.histories = IO.read_pickle(self.history_file)
+        else:
+            os.makedirs(self.path, exist_ok=True)
+            self.model = factory.create_model()
+            self.histories = []
+            save_json(self.settings_file,factory.get_settings())
+            plot_model(self.model, to_file=os.path.join(self.path, 'model.png'), show_shapes=True)
+            self.save()
+
+    def train(self, train_indices, validate_indices=None, batch_size=64, **kwargs):
+        generator = DataGenerator(
+            train_indices,
+            self.X_featurizer.get_features,
+            self.Y_featurizer.get_features,
+            sample_weights_selector=self.weights_selector,
+            batch_size = batch_size
+        )
+
+        if validate_indices is not None:
+            validator = DataGenerator(
+                validate_indices,
+                self.X_featurizer.get_features,
+                self.Y_featurizer.get_features
+            )
+        else:
+            validator = None
+
+        history = self.model.fit_generator(generator, validation_data=validator, **kwargs)
+        self.histories.append(history.history)
+
+
+    def save(self):
+        try:
+            self.model.save(self.model_file)
+            IO.write_pickle(self.histories,self.history_file)
+        except:
+            self.model.save(self.model_file) #this is mainly to resolve the problem of the corrupted file when KeyboardInterrupt
+            save_pkl(self.history_file, self.histories)
+            raise
+
+    def make_all_train(self, train_indices,  call_count=1, **train_kwargs):
+        for i in range(call_count):
+            self.train(train_indices=train_indices, **train_kwargs)
+            self.save()
+
+    def _evaluate_iter(self, index, batch_size=64):
+        batches = Query.en(index).feed(fluq.partition_by_count(batch_size)).to_list()
+        q = Query.en(batches)
+        for batch in q:
+            input = self.X_featurizer.get_features(batch)
+            output = self.model.predict_on_batch(input)
+            answer = self.Y_featurizer.get_features(batch)
+            for i in range(len(batch)):
+                result = EvaluationResult(
+                    batch[i],
+                    self.X_featurizer.get_feature_at_index(input, i),
+                    self.Y_featurizer.get_feature_at_index(output, i),
+                    self.Y_featurizer.get_feature_at_index(answer, i))
+                yield result
+
+    def evaluate(self, index, batch_size=64)-> Queryable[EvaluationResult]:
+        return Queryable(self._evaluate_iter(index,batch_size),len(index))
+

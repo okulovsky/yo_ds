@@ -1,0 +1,84 @@
+from sklearn import datasets
+from yo_ml.keras import *
+
+import unittest
+from yo_ml__tests.common import *
+
+feature_columns = ['F1', 'F2', 'F3', 'F4']
+classes_count = 3
+path = get_path('keras')
+
+def make_df() -> pd.DataFrame:
+    iris = datasets.load_iris()
+    df = pd.DataFrame(iris['data'], columns=feature_columns)
+    df = df.assign(target=iris['target'])
+    df = df.feed(alg.stratify('target', random_state=42))
+    df = df.assign(in_train=np.where(df.index < df.shape[0] * 3 / 4, True, False))
+    return df
+
+class ModelFactory(ModelFactoryBase):
+    def __init__(self, df):
+        self.df = df
+
+    def mapper_x(self, ids):
+        return self.df.loc[ids][feature_columns].values
+
+    def mapper_y(self, ids):
+        result = np.zeros((len(ids),classes_count))
+        for position_1, id in enumerate(ids):
+            result[position_1,self.df.loc[id].target]=1
+        return result
+
+    def create_x_featurizer(self):
+        return Featurizer(self.mapper_x)
+
+    def create_y_featurizer(self):
+        return Featurizer(self.mapper_y)
+
+    def create_model(self):
+        model = keras.models.Sequential()
+        model.add(keras.layers.Dense(
+            8,
+            input_shape=(len(feature_columns),),
+            activation='relu',
+            name='hidden'))
+        model.add(keras.layers.Dense(
+            classes_count,
+            activation='softmax',
+            name='output'))
+        model.compile(loss=keras.losses.categorical_crossentropy, optimizer='adam')
+        return model
+
+def run_train(df, folder, call_count, epochs, reset):
+    process = KerasTrainTest(ModelFactory(df), os.path.join(path, folder), reset=reset)
+    process.make_all_train(
+        list(df.loc[df.in_train].index),
+        call_count,
+        epochs=epochs,
+        batch_size=5,
+        verbose=1
+    )
+
+
+
+class KerasTests:#(unittest.TestCase):
+    def evaluate(self, df, folder):
+        process = KerasTrainTest(ModelFactory(df), os.path.join(path, folder))
+        result = (process
+                  .evaluate(list(df.index))
+                  .select(lambda z: (df.iloc[z.id].in_train, z.output.argmax(), z.answer.argmax()))
+                  .to_dataframe(columns=['in_train', 'predicted', 'actual'])
+                  )
+        wrongs = (result.loc[result.predicted != result.actual]).shape[0]
+        #self.assertGreater(7,wrongs)
+
+    def test_simple(self):
+        df = make_df()
+        epochs = 5
+        run_train(df,'simple',1,epochs, True)
+        history = IO.read_pickle(os.path.join(path,'simple','history'))
+        self.assertEqual(epochs,len(history[0]['loss']))
+        self.evaluate(df,'simple')
+
+
+

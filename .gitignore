@@ -1,0 +1,13 @@
+pypi_password
+
+__pycache__/
+*.pyc
+\.ipynb_checkpoints/
+\.idea/
+htmlcov/
+release/
+
+\.coverage
+
+yo_fluq_ds__tests/test_queries/files/
+
