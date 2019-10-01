@@ -1,3 +1,3 @@
 from .plots import *
 from .misc import *
-from .maybe import *
+from ._maybe import *

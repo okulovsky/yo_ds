@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION=1.0.0
+VERSION=1.0.1
 
 function make_release() {
     MODULE=$1
@@ -58,4 +58,4 @@ function make_release() {
 rm -rf release
 make_release yo_fluq yo_fluq yo_fluq__tests
 make_release yo_fluq_ds yo_fluq_ds yo_fluq__tests yo_fluq_ds__tests
-make_release yo_ds yo_extensions yo_ml yo_ml__tests
+make_release yo_ds yo_extensions yo_extensions__tests yo_ds yo_ds__tests
