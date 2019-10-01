@@ -28,3 +28,12 @@ class TestGrBar(TestCase):
         df= _get_df()
         df = df.loc[df.a==1]
         grbar_plot(df,'y','x',None)
+
+    def test_6_without_colors(self):
+        df = _get_df()
+        df = df.loc[df.a==1]
+        grbar_plot(df,'y',None,'x')
+
+    def test_7_orient_h(self):
+        df = _get_df()
+        grbar_plot(df,'y','a','x',orient='h')
