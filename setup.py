@@ -4,8 +4,8 @@ def readme():
       with open('README.md') as file:
             return file.read()
 
-setup(name='yo_ds',
-      version='0.4.16',
+setup(name='yo_ds_dev',
+      version='0.0.0',
       description='The toolkit for data science projects with a focus on functional programming',
       long_description=readme(),
       long_description_content_type='text/markdown',
@@ -31,6 +31,7 @@ setup(name='yo_ds',
             'seaborn',
             'jsonpickle',
             'deprecated',
+            'pyaml',
             # the modules below are required for yo_ml+
             'sklearn',
             'keras',
