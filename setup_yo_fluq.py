@@ -22,7 +22,5 @@ setup(name='yo_fluq',
       packages=find_packages(),
       install_requires=[],
       include_package_data = True,
-      zip_safe=False,
-      test_suite='nose.collector',
-      tests_require=['nose']
+      zip_safe=False
       )

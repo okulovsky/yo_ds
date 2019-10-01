@@ -4,7 +4,7 @@ def readme():
       with open('README.md') as file:
             return file.read()
 
-setup(name='yo_ds_dev',
+setup(name='_development_yo_ds',
       version='0.0.0',
       description='The toolkit for data science projects with a focus on functional programming',
       long_description=readme(),

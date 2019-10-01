@@ -35,7 +35,5 @@ setup(name='yo_fluq_ds',
 
       ],
       include_package_data = True,
-      zip_safe=False,
-      test_suite='nose.collector',
-      tests_require=['nose']
+      zip_safe=False
       )
