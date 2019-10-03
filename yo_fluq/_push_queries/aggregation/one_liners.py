@@ -146,9 +146,15 @@ class ArgMax(ArithmeticPQE):
             True
         )
 
+def _all_any_value_selectors(value):
+    if isinstance(value,bool):
+        return value
+    return True
 
 class All(ArithmeticPQE):
-    def __init__(self, value_selector=lambda z: True):
+    def __init__(self, value_selector=None):
+        if value_selector is None:
+            value_selector = _all_any_value_selectors
         super(All, self).__init__(
             lambda: True,
             lambda state, element: state and value_selector(element),
@@ -157,7 +163,9 @@ class All(ArithmeticPQE):
         )
 
 class Any(ArithmeticPQE):
-    def __init__(self, value_selector=lambda z: True):
+    def __init__(self, value_selector=None):
+        if value_selector is None:
+            value_selector = _all_any_value_selectors
         super(Any, self).__init__(
             lambda: False,
             lambda state, element: state or value_selector(element),
