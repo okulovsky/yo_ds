@@ -60,10 +60,10 @@ class AggregationCodeFactory:
     def count(self):
         return self.method_concatenator(agg.Count())
 
-    def any(self, selector: Callable = lambda z: True):
+    def any(self, selector: Optional[Callable] = None):
         return self.method_concatenator(agg.Any(selector))
 
-    def all(self, selector: Callable = lambda z: True):
+    def all(self, selector: Optional[Callable] = None):
         return self.method_concatenator(agg.All(selector))
 
     def to_list(self):
