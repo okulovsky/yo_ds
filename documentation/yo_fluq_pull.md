@@ -138,7 +138,7 @@ This solution is combining the best parts of `pandas` and `itertools`. It is flu
 * Fluent
 * Lazy
 * Extendable: you can add your own filter
-* After each dot `.`, in IDE you can see the list of methods applicable, so half of this query will be written by IDE.
+* After each dot `.` in IDE you can see the list of methods applicable, so half of this query will be written by IDE.
 
 ## Related works
 
@@ -148,14 +148,15 @@ What I did is port to Python.
 
 I know about these analogues:
 
-* [`asq`](https://github.com/sixty-north/asq). The key difference is that `yo_fluq` has annotations and it's expansion technique preserves type hints
-* In some sense, [`fluentpy`](https://github.com/dwt/fluent), however, the approach of this module is more fundamental, which leads to the side effects, described in the repo.
-* [`RxPy`](https://github.com/ReactiveX/RxPY) contains LINQ port, which is non-extendable and is not a main focus of the library anyway.    
+* [`asq`](https://github.com/sixty-north/asq), ['py-linq'](https://pypi.org/project/py_linq/). The key difference is that `yo_fluq` has annotations and it's expansion technique preserves type hints
+* ['plinq'](https://pypi.org/project/plinq/) has type annotations, but does not have an extendability mechanism.
+* [`RxPy`](https://github.com/ReactiveX/RxPY) contains LINQ port, which is non-extendable and is not a main focus of the library anyway.
+* In some sense [`fluentpy`](https://github.com/dwt/fluent). However the approach of this module is more fundamental, and that leads to the side effects described in the repo.
 
 
 ## Fluent data processing
 
-The typical `fluq` pipeline looks like that:
+The typical `fluq` pipeline looks like this:
 
 ```python
 (Query
@@ -176,7 +177,7 @@ The typical `fluq` pipeline looks like that:
 ```
 
 The typical `fluq` pipeline consists of:
-* The source `Query.en(orders)`. This creates the `Queryable` object, which can be perceived as a flow of objects
+* The source `Query.en(orders)`. This creates the `Queryable` object which can be perceived as a flow of objects
 * The set of filters `where`, `select`, `take`, `group_by`
 * The final aggreagation `to_dictionary`, that initiates all other components and produces the result.
 
@@ -187,7 +188,7 @@ The typical `fluq` pipeline consists of:
 | `Query.en(list)`        | `list: Iterable[T]`     | `Q[T]` |
 | `Query.args(*args)`     | `*args: Any`            | `Q[Any]` | Mostly used in unit tests
 | `Query.dict(dict)`      | `dict: Dict[TKey,TValue]` | `Q[KeyValuePair[TKey,TValue]]` | Use Query.en(dict.values()) or Query.en(dict) to access only keys or values
-| `Query.loop(begin,delta,end,endtype)` | | `Q[Any]` | Produces begin, begin+delta, begin+delta+delta, etc, until the end. Also works when delta is negative. `endType` determines when exactly process ends.
+| `Query.loop(begin,delta,end,endtype)` | | `Q[Any]` | Produces begin, begin+delta, begin+delta+delta, etc. until the end. Also works when delta is negative. `endType` determines when exactly process ends.
 
 Notes:
 * `Query` is a singleton instance of `QueryFactory` class that contains all the sources.  
@@ -241,7 +242,7 @@ will order the collection by the ascending first letter, and then by the descend
 
 ### Aggregators
 
-Each aggregator exists in two forms: as a method in Queryable, and as a class in `agg` module. The reason is, that aggregtors are reused in both pull- and push-queries. The names are self-explanatory:
+Each aggregator exists in two forms: as a method in Queryable, and as a class in `agg` module. The reason is, that aggregators are reused in both pull- and push-queries. The names are self-explanatory:
 * Getters: `first`, `last` and `single` (works like `first` but throws exception if more than element occur)
 * Basic math: `sum`, `count`, `mean`, `std`, `max`, `min`
 * `arg_max` and `arg_min` (accepts `selector`, return the element for which its value is highest/lowest)
@@ -308,7 +309,7 @@ The sequence of actions is:
 ## Extendability
 
 In C#, there are [extension methods](https://en.wikipedia.org/wiki/Extension_method), the syntax which "add" a method to compiled object. 
-In Python, monkey-patching produces the similar effect, but unfortunately neither PyCharm nor Jupyter Notebook cannot infer the annotations for monkey-patched methods. 
+In Python, monkey-patching produces the similar effect, but unfortunately neither PyCharm nor Jupyter Notebook can infer the annotations for monkey-patched methods.
 Therefore, extendability and type hints come into conflict in Python, and this section describes how the conflict is resolved.   
 
 ### `feed`-method
@@ -364,7 +365,7 @@ So if you want to develop several extension methods, just follow these templates
 
 ### Updating Query and Queryable
 
-At some point, there are simply too much of the extension methods used to often, so the pipeline looks like a sequence of `feed` methods. 
+At some point, there are simply too much of the extension methods used too often, so the pipeline looks like a sequence of `feed` methods.
 
 In order to resolve that, there is a need to re-define `Queryable`, so:
 * the old `Queryable` methods produce instances of new `Queryable`

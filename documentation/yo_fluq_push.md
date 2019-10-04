@@ -32,27 +32,27 @@ report = pipeline(orders_from_huge_file())
 
 The idea behind the this implementation is pretty much alike  [`RxPy`](https://github.com/ReactiveX/RxPY). The differences are:
 * It is optimized for data processing, so pipeline has "two ways": data comes in and in the end the report comes out.
-* It has the same interface as pull-queries and reuse some of its code 
+* It has the same interface as pull-queries and reuse some of their code
 
 ## Push-queries architecture
 
 * `PushQuery` is a class that follows [Builder pattern](https://en.wikipedia.org/wiki/Builder_pattern). It's methods, like `where` or `select`, creates instances of `PushQueryElement`-s and stores them inside the class. Thus, `PushQuery` is a sequence of `PushQueryElement`, or `PQE`.
-* `PushQueryElement` *is not* the entity that processes data. It is the factory that creates such entities instead (`PushQueryElementInstance`, or `PQEI`).
+* `PushQueryElement` *is not* the entity that processes data. It is the factory that creates such entities: `PushQueryElementInstance`, or `PQEI`.
 * PQEI implements `__enter__` and `__exit__` function. It must be entered to before processing data, and exited from after processing. E.g., PQEI that writes to files will close the file on exit.
 
 So when we try to feed data to `PushQuery`, we actually:
 1. Take the first PQE-factory in the `PushQuery` list.
 1. Create PQEI with this factory and enter to it
 1. Feed data to first PQEI. If there are more than one PQE in query, subsequent PQEI will be created and data will be forwarded to them.
-1. After data is over, collect the report from PQEI. If there is more that one PQE in the query, PQEI requests report from subsequent PQEI and maybe transform it.
+1. After data is over, collect the report from PQEI. If there is more that one PQE in the query, PQEI requests report from subsequent PQEI and may transform it.
 1. Exit the PQEI
 
 Depending on its type and purpose, PQEI processes data in following fashions:
 * PQEI for `sum`, `mean` etc. compute reports. If `PushQuery` consists of only one such `PQE`, it's behavior is straightforward: process data and return a report.
 * PQEI for `select` transforms data and feeds it to the subsequent PQEI
-* PQEI for `where` checks the condition and depending on the result, forward it to the subsequent PQEI or discard.
+* PQEI for `where` checks the condition and depending on the result, forwards it to the subsequent PQEI or discards.
 * PQEI for `group_by` checks the group key and:
-    * If this key is seen in the first time, creates a new instance of subsequet PQEI and forwards data to it, keeping a link to this PQEI
+    * If this key is seen for the first time, creates a new instance of subsequet PQEI and forwards data to it, keeping a link to this PQEI
     * If the key was seen before, forwards data to the kept PQEI
     * Thus, `group_by` expands the original pipeline of PQE into *tree* of PQEI.
 
