@@ -1,5 +1,4 @@
 from yo_fluq import PushQueryElement
-from yo_fluq._queries.helpers.core import feed_fluent as _feed_fluent
 from ._push_queries import aggregations as agg
 from . import _fluq as fluq
 from ._misc import *
@@ -30,7 +29,4 @@ pd.DataFrame.feed = _feed
 pd.core.groupby.DataFrameGroupBy.feed = _feed
 pd.core.groupby.SeriesGroupBy.feed = _feed
 
-pd.Series.feed_fluent = _feed_fluent
-pd.DataFrame.feed_fluent = _feed_fluent
-pd.core.groupby.DataFrameGroupBy.feed_fluent = _feed_fluent
-pd.core.groupby.SeriesGroupBy.feed_fluent = _feed_fluent
+    
