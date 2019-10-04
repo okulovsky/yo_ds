@@ -1,3 +1,6 @@
+**1.1.0**
+- For `yo_fluq` and `yo_fluq_ds`, the development status is set to Beta
+
 **1.0.2**
 - Documentation is released
 - `grbar` plot is improved with horizontal layout + some cosmetics

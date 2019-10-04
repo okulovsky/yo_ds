@@ -10,7 +10,7 @@ setup(name='yo_ds',
       long_description=readme(),
       long_description_content_type='text/markdown',
       classifiers = [
-            'Development Status :: 4 - Beta',
+            'Development Status :: 3 - Alpha',
             'License :: OSI Approved :: MIT License',
             'Programming Language :: Python :: 3.6',
             'Topic :: Software Development :: Libraries :: Python Modules'
