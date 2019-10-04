@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from .add_ordering_column import add_ordering_column
+from ._add_ordering_column import add_ordering_column
 from typing import *
 
 

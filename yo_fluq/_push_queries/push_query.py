@@ -6,10 +6,10 @@ class PushQuery(PushQueryElement, AggregationCodeFactory):
     def __init__(self):
         self.head = None  # type: Optional[PushQueryElement]
         self.tail = None  # type: Optional[PushQueryElement]
-        AggregationCodeFactory.__init__(self,self._append)
+        AggregationCodeFactory.__init__(self,self.append)
 
 
-    def _append(self, pqe: PushQueryElement):
+    def append(self, pqe: PushQueryElement):
         if self.head is None:
             self.head = pqe
             self.tail = pqe
@@ -24,20 +24,20 @@ class PushQuery(PushQueryElement, AggregationCodeFactory):
         return self.head.instance()
 
     def select(self, selector: Callable) -> 'PushQuery':
-        return self._append(SelectPQE(selector))
+        return self.append(SelectPQE(selector))
 
     def where(self, filter: Callable) ->'PushQuery':
-        return self._append(WherePQE(filter))
+        return self.append(WherePQE(filter))
 
     def split_pipelines(self, **kwargs:PushQueryElement):
         pqe = SplitPipelines(**kwargs)
-        return self._append(pqe)
+        return self.append(pqe)
 
     def split_by_group(self, group_selector, with_total = None):
-        return self._append(SplitByGroup(group_selector, with_total))
+        return self.append(SplitByGroup(group_selector, with_total))
 
     def split_dictionary(self):
-        return self._append(SplitByDictionary())
+        return self.append(SplitByDictionary())
 
 
 

@@ -123,7 +123,7 @@ class ArithmeticPQE(AbstractPushQueryElement):
         return result
 
 
-class _CommonPQEI(AbstractPushQueryElementInstance):
+class _PushQueryElementInstance(AbstractPushQueryElementInstance):
     def __init__(self, enter_function, process_function, report_function, exit_function):
         self.enter_function = enter_function
         self.process_function = process_function
@@ -146,7 +146,7 @@ class _CommonPQEI(AbstractPushQueryElementInstance):
 
 class PushQueryElement(AbstractPushQueryElement):
     def instance(self):
-        return _CommonPQEI(
+        return _PushQueryElementInstance(
             self.on_enter,
             self.on_process,
             self.on_report,

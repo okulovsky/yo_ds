@@ -79,10 +79,3 @@ def distinct(en, selector):
             continue
         seen.add(key)
         yield e
-
-
-def feed_fluent(obj, collector, method_name='execute'):
-    if hasattr(collector,method_name):
-        raise ValueError("Collector instance already has attribute `{0}`. Specify another name for the finalizing method".format(method_name))
-    setattr(collector,method_name,lambda: collector(obj))
-    return collector
