@@ -148,8 +148,8 @@ What I did is port to Python.
 
 I know about these analogues:
 
-* [`asq`](https://github.com/sixty-north/asq), ['py-linq'](https://pypi.org/project/py_linq/). The key difference is that `yo_fluq` has annotations and it's expansion technique preserves type hints
-* ['plinq'](https://pypi.org/project/plinq/) has type annotations, but does not have an extendability mechanism.
+* [`asq`](https://github.com/sixty-north/asq), [`py-linq`](https://pypi.org/project/py_linq/). The key difference is that `yo_fluq` has annotations and it's expansion technique preserves type hints
+* [`plinq`](https://pypi.org/project/plinq/) has type annotations, but does not have an extendability mechanism.
 * [`RxPy`](https://github.com/ReactiveX/RxPY) contains LINQ port, which is non-extendable and is not a main focus of the library anyway.
 * In some sense [`fluentpy`](https://github.com/dwt/fluent). However the approach of this module is more fundamental, and that leads to the side effects described in the repo.
 
