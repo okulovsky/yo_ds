@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION=1.0.1
+VERSION=1.0.2rc2
 
 function make_release() {
     MODULE=$1
@@ -11,9 +11,10 @@ function make_release() {
     mkdir -p release
     mkdir release/$MODULE
 
-    sed s/VERSIONID/$VERSION/g setup_$MODULE.py >>release/$MODULE/setup.py
+    sed s/VERSIONID/$VERSION/g release_files/setup_$MODULE.py >>release/$MODULE/setup.py
 
-    cp README_$MODULE.md release/$MODULE/README.md
+    cp release_files/README_$MODULE.md release/$MODULE/README.md
+    cp release_files/MANIFEST.in release/$MODULE/MANIFEST.in
 
     for i in "${@:2}"
         do
@@ -29,15 +30,10 @@ function make_release() {
     source activate yo_release
     pip install twine
 
-    python setup.py test
+    python setup.py test || exit 1
 
-    if [ $? -eq 0 ];
-        then
-            python setup.py sdist bdist_wheel;
-            twine upload -u okulovsky -p $PASSWORD dist/*
-        else
-            exit
-    fi
+    python setup.py sdist bdist_wheel;
+    twine upload -u okulovsky -p $PASSWORD dist/*
 
     sleep 5
     pip install $MODULE==$VERSION
@@ -54,6 +50,8 @@ function make_release() {
     source deactivate
     cd ../..
 }
+
+./coverage.sh || exit 1
 
 rm -rf release
 make_release yo_fluq yo_fluq yo_fluq__tests
