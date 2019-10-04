@@ -28,3 +28,8 @@ if __name__=='__main__':
         FileIO.relative_to_file(__file__, 'README_yo_fluq_ds.md'),
         FileIO.relative_to_file(__file__, '../release_files/README_yo_fluq_ds.md'),
     )
+
+    process_file(
+        FileIO.relative_to_file(__file__,'README.md'),
+        FileIO.relative_to_file(__file__,'../README.md')
+    )
