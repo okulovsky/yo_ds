@@ -10,5 +10,5 @@ test_coverage/
 \.coverage
 
 yo_fluq_ds__tests/test_queries/files/
-yo_ds\.egg-info/
-yo_ds_dev\.egg-info/
+
+development_yo_ds\.egg-info/
