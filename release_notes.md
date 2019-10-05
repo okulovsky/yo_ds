@@ -1,3 +1,6 @@
+**1.1.1**
+- Documentation fixes
+
 **1.1.0**
 - For `yo_fluq` and `yo_fluq_ds`, the development status is set to Beta
 
