@@ -3,30 +3,6 @@ import pandas as pd
 from matplotlib.axes import Axes
 from matplotlib import pyplot as plt
 
-
-class _method_wrap(Callable):
-    def __init__(self, method, ax_argument_name='ax'):
-        self.method = method
-        self.ax_argument_name = ax_argument_name
-
-    def __call__(self, obj, ax, *args, **kwargs):
-        kwargs[self.ax_argument_name] = ax
-        self.method(*args,**kwargs)
-
-
-class _obj_method_wrap(Callable):
-    def __init__(self, method_selector, ax_argument_name='ax'):
-        self.method_selector = method_selector
-        self.ax_argument_name = ax_argument_name
-
-    def __call__(self, obj, ax, *args, **kwargs):
-        kwargs[self.ax_argument_name] = ax
-        method = self.method_selector(obj)
-        method(*args,**kwargs)
-
-
-
-
 class FluentPlot:
     def __init__(self):
         super(FluentPlot, self).__init__()
@@ -41,8 +17,6 @@ class FluentPlot:
         self._with_legend = False  # type: bool
 
         self._method = None
-        self._args = None
-        self._kwargs = None
         self._iterate = False
         self._iterate_df_columns = False
 
@@ -72,28 +46,18 @@ class FluentPlot:
         return ax
 
 
-    def _make_args(self, obj):
-        args = [a(obj) if callable(a) else a for a in self._args]
-        return args
-
-
-    def _make_kwargs(self, obj):
-        kwargs = {key: (value(obj) if callable(value) else value) for key, value in self._kwargs.items()}
-        return kwargs
-
-
     def _draw(self, obj, ax):
         if self._iterate:
             for item in obj:
-                self._method(item, ax, *self._make_args(item), **self._make_kwargs(item))
+                self._method(item, ax)
         elif self._iterate_df_columns:
             if not isinstance(obj,pd.DataFrame):
                 raise ValueError('Value expect to be pd.Dataframe to do iterate over its columns')
             for c in obj.columns:
                 item = obj[c]
-                self._method(item, ax, *self._make_args(item), **self._make_kwargs(item))
+                self._method(item, ax)
         else:
-            self._method(obj, ax, *self._make_args(obj), **self._make_kwargs(obj))
+            self._method(obj, ax)
 
 
     def on(self, ax: Axes) -> 'FluentPlot':
@@ -125,24 +89,9 @@ class FluentPlot:
         return self
 
 
-    def call_ax(self, ax_selector: Callable[[Axes],Callable]) -> 'FluentPlot':
-        self._method = lambda obj, ax, *args, **kwargs: ax_selector(ax)(*args,**kwargs)
+    def call(self, method: Callable[[Any,Axes],Any]) -> 'FluentPlot':
+        self._method = method
         return self
-
-    def call_obj(self, obj_method_selector, ax_argument_name='ax') -> 'FluentPlot':
-        self._method = _obj_method_wrap(obj_method_selector, ax_argument_name)
-        return self
-
-    def call(self, method, ax_argument_name='ax') -> 'FluentPlot':
-        self._method = _method_wrap(method, ax_argument_name)
-        return self
-
-
-    def args(self, *args, **kwargs) -> 'FluentPlot':
-        self._args = args
-        self._kwargs = kwargs
-        return self
-
 
     def iterate(self, iterate=True) -> 'FluentPlot':
         self._iterate = iterate
