@@ -1,3 +1,6 @@
+**1.1.2**
+- FluentPlot refactored, obsolete methods are removed
+
 **1.1.1**
 - Documentation fixes
 
