@@ -5,5 +5,5 @@ class TestPlotsMisc(TestCase):
         df = pd.Series([1,2,3])
         self.assertRaises(
             ValueError,
-            lambda: df.feed(FluentPlot().call_obj(lambda z: z.plot).args().iterate_df_columns())
+            lambda: df.feed(FluentPlot().call(lambda z, ax: z.plot(ax=ax)).iterate_df_columns())
         )
