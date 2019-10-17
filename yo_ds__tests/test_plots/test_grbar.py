@@ -37,3 +37,8 @@ class TestGrBar(TestCase):
     def test_7_orient_h(self):
         df = _get_df()
         grbar_plot(df,'y','a','x',orient='h')
+
+    def test_8_confints(self):
+        df = _get_df()
+        df = df.assign(confint=df.apply(lambda z: pd.Interval(z.y-z.err,z.y+z.err),axis=1))
+        grbar_plot(df,'confint','a','x')
