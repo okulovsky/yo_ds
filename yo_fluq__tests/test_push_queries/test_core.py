@@ -35,6 +35,14 @@ class CoreTestCase(TestCase):
             Query.push().split_by_group(lambda z: z%2).to_list()([1,2,3,4])
         )
 
+    def test_split_group_always_dict(self):
+        self.assertDictEqual(
+            {
+                0: [0]
+            },
+            Query.push().split_by_group(lambda z: z).to_list()([0])
+        )
+
     def test_split_group_with_total(self):
         self.assertDictEqual(
             {

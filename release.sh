@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION=1.1.3
+VERSION=1.1.4
 
 function make_release() {
     MODULE=$1

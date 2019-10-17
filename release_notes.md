@@ -1,3 +1,6 @@
+**1.1.4**
+- PushQuery/splits behaviour is fixed, it is always dictionary now
+
 **1.1.3**
 - Added Query.push().select_many
 

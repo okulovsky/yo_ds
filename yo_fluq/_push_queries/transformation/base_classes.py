@@ -8,14 +8,6 @@ class ObservableBase(PushQueryElement):
         for key, value in instance.subscribers.items():
             value.__exit__(exc_type, exc_val, exc_tb)
 
-    def on_report(factory, instance):
-        if len(instance.subscribers) == 0:
-            return None
-        elif len(instance.subscribers) == 1:
-            for value in instance.subscribers.values():
-                return value.report()
-        return {key: value.report() for key, value in instance.subscribers.items()}
-
 
 class SplitPipelines(ObservableBase):
     def __init__(self, *args: PushQueryElement, **kwargs: PushQueryElement):
@@ -46,8 +38,8 @@ class SplitPipelines(ObservableBase):
         for value in instance.subscribers.values():
             value.process(element)
 
-
-
+    def on_report(factory, instance):
+        return {key: value.report() for key, value in instance.subscribers.items()}
 
 
 class ObservableAbstract(ObservableBase):
@@ -78,6 +70,11 @@ class SelectPQE(ObservableAbstract):
     def on_process(factory, instance, element):
         factory.push_element(instance, factory.selector(element))
 
+    def on_report(factory, instance):
+        for value in instance.subscribers.values():
+            return value.report()
+
+
 
 class SelectManyPQE(ObservableAbstract):
     def __init__(self, selector: Callable):
@@ -88,6 +85,11 @@ class SelectManyPQE(ObservableAbstract):
         for smaller_element in factory.selector(element):
             factory.push_element(instance, smaller_element)
 
+    def on_report(factory, instance):
+        for value in instance.subscribers.values():
+            return value.report()
+
+
 
 class WherePQE(ObservableAbstract):
     def __init__(self, filter: Callable):
@@ -97,6 +99,11 @@ class WherePQE(ObservableAbstract):
     def on_process(factory, instance, element):
         if factory.filter(element):
             factory.push_element(instance, element)
+
+    def on_report(factory, instance):
+        for value in instance.subscribers.values():
+            return value.report()
+
 
 
 class Dispatch(ObservableBase):
@@ -120,6 +127,11 @@ class Dispatch(ObservableBase):
             instance.subscribers[bucket] = factory.continuation.instance()
             instance.subscribers[bucket].__enter__()
         instance.subscribers[bucket].process(element)
+
+
+    def on_report(factory, instance):
+        return {key: value.report() for key, value in instance.subscribers.items()}
+
 
 
 class SplitByGroup(Dispatch):
