@@ -29,6 +29,9 @@ class PushQuery(PushQueryElement, AggregationCodeFactory):
     def where(self, filter: Callable) ->'PushQuery':
         return self.append(WherePQE(filter))
 
+    def select_many(self, selector: Callable) -> 'PushQuery':
+        return self.append(SelectManyPQE(selector))
+
     def split_pipelines(self, **kwargs:PushQueryElement):
         pqe = SplitPipelines(**kwargs)
         return self.append(pqe)

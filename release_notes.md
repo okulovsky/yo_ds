@@ -1,3 +1,6 @@
+**1.1.3**
+- Added Query.push().select_many
+
 **1.1.2**
 - FluentPlot refactored, obsolete methods are removed
 

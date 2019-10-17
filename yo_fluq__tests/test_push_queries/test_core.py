@@ -14,6 +14,12 @@ class CoreTestCase(TestCase):
             Query.push().select(lambda z: z*10).to_list()([1,2,3])
         )
 
+    def test_select_many(self):
+        self.assertListEqual(
+            ['a','b','c','d','e','f'],
+            Query.push().select_many(lambda z: z).to_list()(['abc','','de','f'])
+        )
+
     def test_where(self):
         self.assertListEqual(
             [1,2],

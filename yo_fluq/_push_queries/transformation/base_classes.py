@@ -79,6 +79,16 @@ class SelectPQE(ObservableAbstract):
         factory.push_element(instance, factory.selector(element))
 
 
+class SelectManyPQE(ObservableAbstract):
+    def __init__(self, selector: Callable):
+        super(SelectManyPQE, self).__init__()
+        self.selector = selector
+
+    def on_process(factory, instance, element):
+        for smaller_element in factory.selector(element):
+            factory.push_element(instance, smaller_element)
+
+
 class WherePQE(ObservableAbstract):
     def __init__(self, filter: Callable):
         super(WherePQE, self).__init__()
