@@ -7,8 +7,11 @@ class GeneralSelectorsTests(TestCase):
     def test_select(self):
         self.assertListEqual(
             ['1','2'],
-            Query.args(1, 2).select(str).to_list()
+            Query.args(1, 2).select(str)
         )
+
+    def test_select_length(self):
+        self.assertEqual(3,Query.en([1,2,3]).select(str).length)
 
     def test_select_many(self):
         self.assertListEqual(
