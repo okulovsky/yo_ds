@@ -344,7 +344,7 @@ What if you want to pass some arguments to this `with_tqdm` method? Then it's a 
 
 ```python
 class with_tqdm(Callable[[Queryable],Queryable]):
-    def __iter__(self, **kwargs):
+    def __init__(self, **kwargs):
         self.kwargs = kwargs
         
     def _with_tqdm_iter(self, queryable):

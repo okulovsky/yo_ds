@@ -1,3 +1,6 @@
+**1.1.5**
+- documentation fixes, improved test coverage
+
 **1.1.4**
 - PushQuery/splits behaviour is fixed, it is always dictionary now
 

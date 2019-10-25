@@ -28,7 +28,8 @@ Unlike `pandas`, `yo_fluq` is:
 * Lazy, so it does not require to keep the whole collection in memory
 * Extendable, so you can define your own filters and use them in pipelines.
 
-Unlike `asq`, another well-known port of C# LINQ to Python, `yo_fluq` fully supports data annotations, even in case of user-defined extensions.
+Unlike [`asq`](https://pypi.org/project/asq/) or [`py_linq`](https://pypi.org/project/py_linq/), well-known ports of C# LINQ to Python, `yo_fluq` fully supports data annotations, even in case of user-defined extensions. Therefore, in IDE like PyCharm you will see the available methods in the hints.
+[`plinq`](https://pypi.org/project/plinq/) supports annotations, but does not offer extendability technique.
 
 The library has been developed since 2017, is extensively tested and is currently available under MIT licence, at Beta development stage.
 
@@ -176,7 +177,7 @@ This solution is combining the best parts of `pandas` and `itertools`. It is flu
 * Fluent
 * Lazy
 * Extendable: you can add your own filter
-* After each dot `.`, in IDE you can see the list of methods applicable, so half of this query will be written by IDE.
+* After each dot `.` in IDE you can see the list of methods applicable, so half of this query will be written by IDE.
 
 ### Related works
 
@@ -186,14 +187,15 @@ What I did is port to Python.
 
 I know about these analogues:
 
-* [`asq`](https://github.com/sixty-north/asq). The key difference is that `yo_fluq` has annotations and it's expansion technique preserves type hints
-* In some sense, [`fluentpy`](https://github.com/dwt/fluent), however, the approach of this module is more fundamental, which leads to the side effects, described in the repo.
-* [`RxPy`](https://github.com/ReactiveX/RxPY) contains LINQ port, which is non-extendable and is not a main focus of the library anyway.    
+* [`asq`](https://github.com/sixty-north/asq), [`py-linq`](https://pypi.org/project/py_linq/). The key difference is that `yo_fluq` has annotations and it's expansion technique preserves type hints
+* [`plinq`](https://pypi.org/project/plinq/) has type annotations, but does not have an extendability mechanism.
+* [`RxPy`](https://github.com/ReactiveX/RxPY) contains LINQ port, which is non-extendable and is not a main focus of the library anyway.
+* In some sense [`fluentpy`](https://github.com/dwt/fluent). However the approach of this module is more fundamental, and that leads to the side effects described in the repo.
 
 
 ### Fluent data processing
 
-The typical `fluq` pipeline looks like that:
+The typical `fluq` pipeline looks like this:
 
 ```python
 (Query
@@ -214,7 +216,7 @@ The typical `fluq` pipeline looks like that:
 ```
 
 The typical `fluq` pipeline consists of:
-* The source `Query.en(orders)`. This creates the `Queryable` object, which can be perceived as a flow of objects
+* The source `Query.en(orders)`. This creates the `Queryable` object which can be perceived as a flow of objects
 * The set of filters `where`, `select`, `take`, `group_by`
 * The final aggreagation `to_dictionary`, that initiates all other components and produces the result.
 
@@ -225,7 +227,7 @@ The typical `fluq` pipeline consists of:
 | `Query.en(list)`        | `list: Iterable[T]`     | `Q[T]` |
 | `Query.args(*args)`     | `*args: Any`            | `Q[Any]` | Mostly used in unit tests
 | `Query.dict(dict)`      | `dict: Dict[TKey,TValue]` | `Q[KeyValuePair[TKey,TValue]]` | Use Query.en(dict.values()) or Query.en(dict) to access only keys or values
-| `Query.loop(begin,delta,end,endtype)` | | `Q[Any]` | Produces begin, begin+delta, begin+delta+delta, etc, until the end. Also works when delta is negative. `endType` determines when exactly process ends.
+| `Query.loop(begin,delta,end,endtype)` | | `Q[Any]` | Produces begin, begin+delta, begin+delta+delta, etc. until the end. Also works when delta is negative. `endType` determines when exactly process ends.
 
 Notes:
 * `Query` is a singleton instance of `QueryFactory` class that contains all the sources.  
@@ -279,7 +281,7 @@ will order the collection by the ascending first letter, and then by the descend
 
 #### Aggregators
 
-Each aggregator exists in two forms: as a method in Queryable, and as a class in `agg` module. The reason is, that aggregtors are reused in both pull- and push-queries. The names are self-explanatory:
+Each aggregator exists in two forms: as a method in Queryable, and as a class in `agg` module. The reason is, that aggregators are reused in both pull- and push-queries. The names are self-explanatory:
 * Getters: `first`, `last` and `single` (works like `first` but throws exception if more than element occur)
 * Basic math: `sum`, `count`, `mean`, `std`, `max`, `min`
 * `arg_max` and `arg_min` (accepts `selector`, return the element for which its value is highest/lowest)
@@ -346,7 +348,7 @@ The sequence of actions is:
 ### Extendability
 
 In C#, there are [extension methods](https://en.wikipedia.org/wiki/Extension_method), the syntax which "add" a method to compiled object. 
-In Python, monkey-patching produces the similar effect, but unfortunately neither PyCharm nor Jupyter Notebook cannot infer the annotations for monkey-patched methods. 
+In Python, monkey-patching produces the similar effect, but unfortunately neither PyCharm nor Jupyter Notebook can infer the annotations for monkey-patched methods.
 Therefore, extendability and type hints come into conflict in Python, and this section describes how the conflict is resolved.   
 
 #### `feed`-method
@@ -381,7 +383,7 @@ What if you want to pass some arguments to this `with_tqdm` method? Then it's a 
 
 ```python
 class with_tqdm(Callable[[Queryable],Queryable]):
-    def __iter__(self, **kwargs):
+    def __init__(self, **kwargs):
         self.kwargs = kwargs
         
     def _with_tqdm_iter(self, queryable):
@@ -402,7 +404,7 @@ So if you want to develop several extension methods, just follow these templates
 
 #### Updating Query and Queryable
 
-At some point, there are simply too much of the extension methods used to often, so the pipeline looks like a sequence of `feed` methods. 
+At some point, there are simply too much of the extension methods used too often, so the pipeline looks like a sequence of `feed` methods.
 
 In order to resolve that, there is a need to re-define `Queryable`, so:
 * the old `Queryable` methods produce instances of new `Queryable`
@@ -444,27 +446,27 @@ report = pipeline(orders_from_huge_file())
 
 The idea behind the this implementation is pretty much alike  [`RxPy`](https://github.com/ReactiveX/RxPY). The differences are:
 * It is optimized for data processing, so pipeline has "two ways": data comes in and in the end the report comes out.
-* It has the same interface as pull-queries and reuse some of its code 
+* It has the same interface as pull-queries and reuse some of their code
 
 ### Push-queries architecture
 
 * `PushQuery` is a class that follows [Builder pattern](https://en.wikipedia.org/wiki/Builder_pattern). It's methods, like `where` or `select`, creates instances of `PushQueryElement`-s and stores them inside the class. Thus, `PushQuery` is a sequence of `PushQueryElement`, or `PQE`.
-* `PushQueryElement` *is not* the entity that processes data. It is the factory that creates such entities instead (`PushQueryElementInstance`, or `PQEI`).
+* `PushQueryElement` *is not* the entity that processes data. It is the factory that creates such entities: `PushQueryElementInstance`, or `PQEI`.
 * PQEI implements `__enter__` and `__exit__` function. It must be entered to before processing data, and exited from after processing. E.g., PQEI that writes to files will close the file on exit.
 
 So when we try to feed data to `PushQuery`, we actually:
 1. Take the first PQE-factory in the `PushQuery` list.
 1. Create PQEI with this factory and enter to it
 1. Feed data to first PQEI. If there are more than one PQE in query, subsequent PQEI will be created and data will be forwarded to them.
-1. After data is over, collect the report from PQEI. If there is more that one PQE in the query, PQEI requests report from subsequent PQEI and maybe transform it.
+1. After data is over, collect the report from PQEI. If there is more that one PQE in the query, PQEI requests report from subsequent PQEI and may transform it.
 1. Exit the PQEI
 
 Depending on its type and purpose, PQEI processes data in following fashions:
 * PQEI for `sum`, `mean` etc. compute reports. If `PushQuery` consists of only one such `PQE`, it's behavior is straightforward: process data and return a report.
 * PQEI for `select` transforms data and feeds it to the subsequent PQEI
-* PQEI for `where` checks the condition and depending on the result, forward it to the subsequent PQEI or discard.
+* PQEI for `where` checks the condition and depending on the result, forwards it to the subsequent PQEI or discards.
 * PQEI for `group_by` checks the group key and:
-    * If this key is seen in the first time, creates a new instance of subsequet PQEI and forwards data to it, keeping a link to this PQEI
+    * If this key is seen for the first time, creates a new instance of subsequet PQEI and forwards data to it, keeping a link to this PQEI
     * If the key was seen before, forwards data to the kept PQEI
     * Thus, `group_by` expands the original pipeline of PQE into *tree* of PQEI.
 

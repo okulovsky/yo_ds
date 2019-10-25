@@ -7,7 +7,7 @@ class GeneralSelectorsTests(TestCase):
     def test_select(self):
         self.assertListEqual(
             ['1','2'],
-            Query.args(1, 2).select(str)
+            Query.args(1, 2).select(str).to_list()
         )
 
     def test_select_length(self):
