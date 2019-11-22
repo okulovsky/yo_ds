@@ -6,13 +6,15 @@ def _grid_iter(keys,lists):
     for config in itertools.product(*lists):
         yield Obj(**{key: value for key, value in zip(keys, config)})
 
-def _grid(**kwargs):
-    keys = list(kwargs)
-    lists = [kwargs[key] for key in keys]
+
+def _grid_dict(dict):
+    keys = list(dict)
+    lists = [dict[key] for key in keys]
     length = 1
     for l in lists:
-        length*=len(l)
+        length *= len(l)
     return Queryable(_grid_iter(keys, lists), length)
+
 
 
 def _grid_args(args):
@@ -45,7 +47,10 @@ def _powerset_iter(iterable):
 
 class CombinatoricsQuery:
     def grid(self, **kwargs)->Queryable[Obj]:
-        return _grid(**kwargs)
+        return _grid_dict(kwargs)
+
+    def grid_dict(self, dict) -> Queryable[Obj]:
+        return _grid_dict(dict)
 
     def cartesian(self,*args)->Queryable[Tuple]:
         return _grid_args(args)
