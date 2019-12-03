@@ -153,7 +153,7 @@ def load_results_iter(folder: str, files=None) -> Iterable[IterationResult]:
         files = [file for file in os.listdir(folder) if file.endswith(EXTENTION)]
     else:
         files = [str(f)+EXTENTION for f in files]
-    for file in Query.en(files).feed(fluq.with_progress_bar(console=True)):
+    for file in Query.en(files).feed(fluq.with_progress_bar()):
         with open(os.path.join(folder, file), 'rb') as f:
             yield pickle.load(f)
 
