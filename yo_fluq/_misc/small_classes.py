@@ -12,6 +12,12 @@ class KeyValuePair(Generic[TKey,TValue]):
         self.key = key
         self.value = value
 
+    def __repr__(self):
+        return dict(key=self.key,value=self.value).__repr__()
+
+    def __str__(self):
+        return dict(key=self.key, value=self.value).__str__()
+
 class ItemWithIndex(KeyValuePair):
     def __init__(self, key, value):
         super(ItemWithIndex, self).__init__(key,value)
