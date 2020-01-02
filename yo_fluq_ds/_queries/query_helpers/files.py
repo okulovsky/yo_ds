@@ -22,8 +22,8 @@ def _zip_text_file(filename, encoding):
             yield line.decode(encoding)
 
 
-def _pickle_file(filename):
-    with open(filename, 'rb') as file:
+def _pickle_file(filename, file_obj_factory):
+    with file_obj_factory(filename) as file:
         while file.read(1):
             file.seek(-1, 1)
             length = file.read(4)
@@ -69,7 +69,10 @@ class FileQuery:
         return Queryable(_zip_folder(path,parser), length)
 
 
-    def pickle(self, path: Union[str,Path]) -> Queryable[Any]:
-        return Queryable(_pickle_file(path))
+    def pickle(self,
+               path: Union[str,Path],
+               file_obj_factory:Optional[Callable] = lambda fname: open(fname,'rb')
+               ) -> Queryable[Any]:
+        return Queryable(_pickle_file(path, file_obj_factory))
 
 
