@@ -50,11 +50,14 @@ class ToZipTextFile(yo_fluq.agg.PushQueryElement):
 
 
 class ToPickleFile(yo_fluq.agg.PushQueryElement):
-    def __init__(self, filename: Union[str,Path]):
+    def __init__(self, filename: Union[str,Path], file_opener = None):
         self.filename = filename
+        if file_opener is None:
+            file_opener = lambda fname: open(fname, 'wb')
+        self.file_opener = file_opener
 
     def on_enter(factory, instance):
-        instance.file = open(factory.filename, 'wb')
+        instance.file = factory.file_opener(factory.filename)
 
     def on_process(factory, instance, element):
         dump = pickle.dumps(element)
