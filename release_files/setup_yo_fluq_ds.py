@@ -30,7 +30,7 @@ setup(name='yo_fluq_ds',
             'jsonpickle',
             'ipython',
             'ipywidgets',
-            'sklearn',
+            'scikit-learn',
             'yo_fluq==VERSIONID'
 
       ],
