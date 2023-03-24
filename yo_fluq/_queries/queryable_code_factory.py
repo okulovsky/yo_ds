@@ -88,8 +88,12 @@ class QueryableCodeFactory(Generic[TFactory,T]):
     def parallel_select(self, selector, workers_count=None, buffer_size=1):
         return FlupFactory.QueryableFactory(parallel_select(self.en, selector, workers_count, buffer_size), self.length)
 
-    def feed(self, collector: Callable[[Any],T]) -> T:
-        return collector(self)
+    def feed(self, *collectors: Callable):
+        result = self
+        for collector in collectors:
+            result = collector(result)
+        return result
+
 
     def aggregate(self, aggregator):
         return aggregate(self.en, aggregator)

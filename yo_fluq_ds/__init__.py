@@ -18,8 +18,11 @@ from typing import *
 T = TypeVar('T')
 TOut = TypeVar('TOut')
 
-def _feed(object: T, method: Callable[[T],TOut])->TOut:
-    return method(object)
+def _feed(object: T, *methods):
+    result = object
+    for method in methods:
+        result = method(result)
+    return result
 
 
 
