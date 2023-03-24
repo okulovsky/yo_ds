@@ -1,14 +1,13 @@
+from typing import *
 from .queryable import Queryable
 from .._push_queries import PushQuery
-from typing import *
-from collections import Sized
 from .._common import *
 from .helpers import loop_maker
 
 class QueryClass:
     def en(self, en: Iterable) -> Queryable:
         length = None
-        if isinstance(en,Sized):
+        if hasattr(en, '__len__'):
             length = len(en)
         return FlupFactory.QueryableFactory(en,length)
 
