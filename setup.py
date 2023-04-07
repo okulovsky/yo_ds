@@ -22,21 +22,15 @@ setup(name='development_yo_ds',
       packages=find_packages(),
       install_requires=[
             'pandas',
-            'coverage',
-            # the modules below are required for yo_extensions+
-            'ipython',
-            'ipywidgets',
             'matplotlib',
+            'numpy',
             'tqdm',
             'seaborn',
-            'jsonpickle',
-            'deprecated',
             'pyaml',
-            # the modules below are required for yo_ml+
-            'sklearn',
-            'keras',
-            'tensorflow',
-            'pydot'
+            'jsonpickle',
+            'ipython',
+            'ipywidgets',
+            'scikit-learn',
       ],
       include_package_data = True,
       zip_safe=False)
